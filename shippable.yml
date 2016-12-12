@@ -45,7 +45,7 @@ build:
     - ./gradlew assembleDebug
     #ci_deploy_script.sh will also ensure that we are in the `master` branch and that we have secure env setup.
     - ./scripts/ci_deploy_script.sh $BRANCH $KEYSTORE_FILE_URL $PUBLISH_CERT_FILE_URL
-    - aws s3 cp app/build/outputs/apk/* s3://anysoftkeyboard/build_${BUILD_NUMBER}/apk/ --exclude "*" --include "*.apk" --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers full=emailaddress=menny@evendanan.net
+    - aws s3 cp app/build/outputs/apk/* s3://anysoftkeyboard/build_${BUILD_NUMBER}/apk/ --exclude "*" --include "*.apk" --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers full=emailaddress=menny@evendanan.net || true
     - echo "APKs be found at https://s3.amazonaws.com/anysoftkeyboard/build_${BUILD_NUMBER}/apk"
   on_success:
     #copying reports for Shippable
@@ -55,9 +55,9 @@ build:
     # posts code-coverage to codecov.io
     - ./scripts/ci_binaries/codecov.sh -X gcov -X coveragepy -f $COV_REPORT_LOCATION
   on_failure:
-    - aws s3 cp app/build/reports/tests/ s3://anysoftkeyboard/build_${BUILD_NUMBER}/tests/ --recursive --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers full=emailaddress=menny@evendanan.net
+    - aws s3 cp app/build/reports/tests/ s3://anysoftkeyboard/build_${BUILD_NUMBER}/tests/ --recursive --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers full=emailaddress=menny@evendanan.net || true
     - echo "Test results can be found at https://s3.amazonaws.com/anysoftkeyboard/build_${BUILD_NUMBER}/tests/testDebugUnitTest/debug/index.html"
-    - aws s3 cp app/build/outputs/* s3://anysoftkeyboard/build_${BUILD_NUMBER}/lints/ --exclude "*" --include "lint*" --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers full=emailaddress=menny@evendanan.net
+    - aws s3 cp app/build/outputs/* s3://anysoftkeyboard/build_${BUILD_NUMBER}/lints/ --exclude "*" --include "lint*" --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers full=emailaddress=menny@evendanan.net || true
     - echo "Lint checks results can be found at https://s3.amazonaws.com/anysoftkeyboard/build_${BUILD_NUMBER}/lints/lint-results-debug.html"
 integrations:
   notifications:
