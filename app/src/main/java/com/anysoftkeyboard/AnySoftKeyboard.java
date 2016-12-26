@@ -58,7 +58,7 @@ import com.anysoftkeyboard.dictionaries.DictionaryAddOnAndBuilder;
 import com.anysoftkeyboard.dictionaries.ExternalDictionaryFactory;
 import com.anysoftkeyboard.dictionaries.TextEntryState;
 import com.anysoftkeyboard.dictionaries.sqlite.AutoDictionary;
-import com.anysoftkeyboard.ime.AnySoftKeyboardWithQuickText;
+import com.anysoftkeyboard.ime.AnySoftKeyboardWithGestureTyping;
 import com.anysoftkeyboard.keyboards.AnyKeyboard;
 import com.anysoftkeyboard.keyboards.AnyKeyboard.HardKeyboardTranslator;
 import com.anysoftkeyboard.keyboards.CondenseType;
@@ -93,7 +93,7 @@ import java.util.List;
 /**
  * Input method implementation for QWERTY-ish keyboard.
  */
-public abstract class AnySoftKeyboard extends AnySoftKeyboardWithQuickText implements SoundPreferencesChangedListener {
+public abstract class AnySoftKeyboard extends AnySoftKeyboardWithGestureTyping implements SoundPreferencesChangedListener {
 
     private static final long ONE_FRAME_DELAY = 1000L / 60L;
     private static final long CLOSE_DICTIONARIES_DELAY = 5 * ONE_FRAME_DELAY;
@@ -138,7 +138,7 @@ public abstract class AnySoftKeyboard extends AnySoftKeyboardWithQuickText imple
     /*
      * is prediction needed for the current input connection
      */
-    public boolean mPredictionOn;
+    private boolean mPredictionOn;
     /*
      * is out-side completions needed
      */
@@ -671,6 +671,12 @@ public abstract class AnySoftKeyboard extends AnySoftKeyboardWithQuickText imple
         }
     }
 
+    @Override
+    public void onGestureTypingInput(int[] keyCodesInPath, int pathLength) {
+        //only doing gesturing typing if in prediction mode
+        if (mPredictionOn) super.onGestureTypingInput(keyCodesInPath, pathLength);
+    }
+
     private void onPhysicalKeyboardKeyPressed() {
         EditorInfo editorInfo = getCurrentInputEditorInfo();
         mLastEditorIdPhysicalKeyboardWasUsed = editorInfo == null ? 0 : editorInfo.fieldId;
@@ -801,7 +807,7 @@ public abstract class AnySoftKeyboard extends AnySoftKeyboardWithQuickText imple
         setSuggestions(null, false, false, false);
     }
 
-    public void setSuggestions(List<CharSequence> suggestions,
+    private void setSuggestions(List<CharSequence> suggestions,
                                 boolean completions, boolean typedWordValid,
                                 boolean haveMinimalSuggestion) {
         if (mCandidateView != null) {
@@ -1101,7 +1107,7 @@ public abstract class AnySoftKeyboard extends AnySoftKeyboardWithQuickText imple
         return false;
     }
 
-    public void commitTyped(@Nullable InputConnection inputConnection) {
+    private void commitTyped(@Nullable InputConnection inputConnection) {
         if (mPredicting) {
             mPredicting = false;
             if (mWord.length() > 0) {
@@ -2016,7 +2022,7 @@ public abstract class AnySoftKeyboard extends AnySoftKeyboardWithQuickText imple
         setCandidatesViewShown(shouldCandidatesStripBeShown() || mCompletionOn);
     }
 
-    public boolean pickDefaultSuggestion(boolean autoCorrectToPreferred) {
+    private boolean pickDefaultSuggestion(boolean autoCorrectToPreferred) {
         // Complete any pending candidate query first
         if (mKeyboardHandler.hasMessages(KeyboardUIStateHandler.MSG_UPDATE_SUGGESTIONS)) {
             performUpdateSuggestions();
@@ -2251,7 +2257,7 @@ public abstract class AnySoftKeyboard extends AnySoftKeyboardWithQuickText imple
         if (ic != null) ic.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_UP, key));
     }
 
-    public void vibrate() {
+    private void vibrate() {
         if (mVibrationDuration > 0 && mVibrator != null) {
             try {
                 mVibrator.vibrate(mVibrationDuration);
